@@ -1,0 +1,10 @@
+{
+  "name": "twitbot",
+  "description": "Very Simple Twitter Bot",
+  "version": "0.1.0",
+  "author": "Stanislas Polu <stan@usecrowd.com>",
+  "keywords": ["twitter", "bot", "oauth"],
+  "dependencies": { "oauth": ">=0.9.0" },
+  "bin" : { "twitbot" : "./bin/twitbot.js" },
+  "engines": { "node": ">=0.4.0" }
+}
