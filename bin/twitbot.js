@@ -2,6 +2,7 @@
 
 var sys = require('sys');
 var util = require('util');
+var crypto = require('crypto');
 var http = require('http');
 var oauth = require('oauth');
 
@@ -47,29 +48,35 @@ var twitbot = function(spec, my) {
 					      body += chunk;
 					  });
 				   res.on('end', function () {
-					      var json = JSON.parse(body);
-					      if(json.error) {
-						  // ERROR: slow down
-						  setTimeout(refresh, 4000); 
-						  return;
-					      }
-					      if(json.results) {
-						  for(var i = 0; i < json.results.length; i ++) {
-						      var tweet = json.results[i];
-						      if(tweet.id > my.since_id) {
-							  // PROCESS tweet HERE then post(status)
-							  console.log('TWEET: ' + tweet.text);
+					      try {
+						  var json = JSON.parse(body);
+						  if(json.error) {
+						      // ERROR: slow down
+						      setTimeout(refresh, 4000); 
+						      return;
+						  }
+						  console.log(my.since_id);
+						  if(json.results && my.since_id > 0) {
+						      for(var i = 0; i < json.results.length; i ++) {
+							  var tweet = json.results[i];
+							  if(tweet.id > my.since_id) {
+							      // PROCESS tweet HERE
+							      console.log('TWEET: ' + tweet.text);
+							  }
 						      }
 						  }
+						  if(json.max_id && json.max_id > my.since_id) {
+						      my.since_id = json.max_id;
+						      refresh();
+						  }
+						  else {
+						      // NO RESULT: slow down
+						      setTimeout(refresh, 1000); 
+						  }						  
+					      } catch (x) {						  
+						  setTimeout(refresh, 4000); 
 					      }
-					      if(json.max_id && json.max_id != my.since_id) {
-						  my.since_id = json.max_id;
-						  refresh();
-					      }
-					      else {
-						  // NO RESULT: slow down
-						  setTimeout(refresh, 1000); 
-					      }
+
 					  });
 			       });
 	req.on('error', function(e) {
